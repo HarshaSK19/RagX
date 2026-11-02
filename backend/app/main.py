@@ -1,0 +1,64 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.core.config import settings
+from app.api.auth_api import router as auth_router
+from app.api.admin_api import router as admin_router
+from app.api.documents import router as documents_router
+from app.api.rag import router as rag_router
+from app.api.quality import router as quality_router
+from app.api.evaluator_api import router as evaluator_router
+from app.api.nova_api import router as nova_router
+
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    description="RAGX Backend API — Data Quality & Answer Reliability Evaluation Engine",
+    version="3.2.0"
+)
+
+# Enable CORS for local Vite React development
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://rag-x-4zck.vercel.app",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:8000",
+        "*"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include API Routers
+app.include_router(auth_router, prefix=settings.API_PREFIX)
+app.include_router(admin_router, prefix=settings.API_PREFIX)
+app.include_router(documents_router, prefix=settings.API_PREFIX)
+app.include_router(rag_router, prefix=settings.API_PREFIX)
+app.include_router(quality_router, prefix=settings.API_PREFIX)
+app.include_router(evaluator_router, prefix=settings.API_PREFIX)
+app.include_router(nova_router, prefix=settings.API_PREFIX)
+
+@app.on_event("startup")
+async def startup_event():
+    # Fast non-blocking startup
+    pass
+
+
+
+
+
+
+@app.get("/")
+async def root():
+    return {
+        "status": "online",
+        "app": "RAGX Backend Engine",
+        "phase": "Phase 1 — Basic RAG Pipeline",
+        "docs_url": "/docs"
+    }
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
